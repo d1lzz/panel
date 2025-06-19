@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌌 Galaxy Panel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: black;
+      color: #e0e0ff;
+      overflow-y: auto;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    video.bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.5;
+    }
+
+    .form-container {
+      max-width: 500px;
+      margin: 5rem auto;
+      background: rgba(20, 20, 40, 0.85);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(140, 120, 255, 0.6);
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #7f5af0, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(120, 100, 255, 0.8);
+    }
+
+    label {
+      display: block;
+      margin: 1rem 0 0.5rem;
+      font-weight: bold;
+      color: #c4b5fd;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 8px;
+      background: rgba(30, 30, 60, 0.6);
+      border: 1px solid #7c3aed;
+      color: #fff;
+      outline: none;
+    }
+
+    .checkbox {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox input {
+      transform: scale(1.2);
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .choice-btn {
+      flex: 1 0 30%;
+      padding: 0.5rem;
+      background: rgba(100, 100, 200, 0.2);
+      border: 1px solid #7c3aed;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .choice-btn:hover {
+      background: rgba(120, 80, 255, 0.4);
+    }
+
+    .choice-btn.active {
+      background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+      box-shadow: 0 0 10px #a78bfa;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #6b21a8, #7c3aed);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 15px #8b5cf6;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    }
+
+    pre {
+      margin-top: 1.5rem;
+      background: rgba(17, 24, 39, 0.7);
+      padding: 1rem;
+      border-radius: 8px;
+      color: #a78bfa;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background video -->
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="https://n.uguu.se/OezZDowx.mp4" type="video/mp4">
+  </video>
+
+  <div class="form-container">
+    <h1>🚀 Create Galaxy Panel</h1>
+
+    <div class="checkbox">
+      <input type="checkbox" id="unliMode" onchange="toggleUnlimited()">
+      <label for="unliMode">Unlimited Mode (RAM/Disk/CPU = 0)</label>
+    </div>
+
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Enter username" />
+
+    <label>RAM</label>
+    <div class="button-group" id="ram-buttons"></div>
+
+    <label>Disk</label>
+    <div class="button-group" id="disk-buttons"></div>
+
+    <label for="cpu">CPU (%)</label>
+    <input type="number" id="cpu" placeholder="100" />
+
+    <button onclick="createPanel()">🌠 Create Panel</button>
+    <pre id="result"></pre>
+  </div>
+
+  <script>
+    const ramButtons = document.getElementById("ram-buttons");
+    const diskButtons = document.getElementById("disk-buttons");
+    const cpuInput = document.getElementById("cpu");
+
+    let selectedRam = null;
+    let selectedDisk = null;
+
+    for (let i = 1; i <= 10; i++) {
+      const ramBtn = document.createElement("div");
+      ramBtn.textContent = `${i} GB`;
+      ramBtn.value = i * 1024;
+      ramBtn.className = "choice-btn";
+      ramBtn.onclick = () => selectBtn(ramBtn, "ram");
+      ramButtons.appendChild(ramBtn);
+
+      const diskBtn = document.createElement("div");
+      diskBtn.textContent = `${i} GB`;
+      diskBtn.value = i * 1024;
+      diskBtn.className = "choice-btn";
+      diskBtn.onclick = () => selectBtn(diskBtn, "disk");
+      diskButtons.appendChild(diskBtn);
+    }
+
+    function selectBtn(btn, type) {
+      const group = type === "ram" ? ramButtons : diskButtons;
+      [...group.children].forEach(el => el.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (type === "ram") selectedRam = parseInt(btn.value);
+      if (type === "disk") selectedDisk = parseInt(btn.value);
+    }
+
+    function toggleUnlimited() {
+      const isUnli = document.getElementById("unliMode").checked;
+
+      [...ramButtons.children].forEach(btn => {
+        btn.classList.remove("active");
+        btn.style.pointerEvents = isUnli ? "none" : "auto";
+        btn.style.opacity = isUnli ? "0.3" : "1";
+      });
+      [...diskButtons.children].forEach(btn => {
+        btn.classList.remove("active");
+        btn.style.pointerEvents = isUnli ? "none" : "auto";
+        btn.style.opacity = isUnli ? "0.3" : "1";
+      });
+
+      selectedRam = isUnli ? 0 : null;
+      selectedDisk = isUnli ? 0 : null;
+      cpuInput.value = isUnli ? 0 : "";
+      cpuInput.readOnly = isUnli;
+    }
+
+    async function createPanel() {
+      const username = document.getElementById("username").value.trim();
+      const cpu = parseInt(cpuInput.value);
+      const result = document.getElementById("result");
+
+      if (!username || selectedRam === null || selectedDisk === null || isNaN(cpu)) {
+        alert("❗ Fill all fields & select resources.");
+        return;
+      }
+
+      const url = `https://apikey.sazxofficial.web.id/api/pterodactyl/create?username=${encodeURIComponent(username)}&ram=${selectedRam}&disk=${selectedDisk}&cpu=${cpu}&eggid=15&nestid=5&loc=1&domain=https://panel.example.com&ptla=isiptlamu&ptlc=isiptlcmu`;
+
+      result.textContent = "🚀 Creating panel...";
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.username && data.password && data.domain) {
+          result.textContent = `(🪐 Panel Created)\nUsername: ${data.username}\nPassword: ${data.password}\nLogin: ${data.domain}`;
+        } else {
+          result.textContent = "⚠️ Failed to create panel.";
+        }
+      } catch (err) {
+        result.textContent = "❌ Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
